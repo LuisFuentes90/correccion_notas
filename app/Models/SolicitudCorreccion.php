@@ -6,24 +6,29 @@ use Illuminate\Database\Eloquent\Model;
 
 class SolicitudCorreccion extends Model
 {
-    // Le decimos a Laravel el nombre exacto de la tabla
     protected $table = 'solicitudes_correccion';
 
-    // Estos son los campos que permitiremos llenar
+    // Tu DB no usa created_at/updated_at, así que los desactivamos
+    public $timestamps = false;
+
     protected $fillable = [
-        'estudiante_id', 
-        'materia_id', 
-        'ciclo_id', 
-        'nota_anterior', 
-        'nota_nueva', 
-        'motivo', 
-        'estado', // Aquí usaremos los nuevos: pendiente_docente, etc.
-        'archivo_evidencia'
+        'estudiante_id', // Nombre exacto de tu SQL
+        'materia_id',
+        'seccion',
+        'ciclo_id',
+        'ciclo',
+        'docente_id',
+        'evaluacion',
+        'nota_actual',
+        'motivo',
+        'estado',
+        'fecha_solicitud'
     ];
 
-    // Relación con el historial de cambios (Punto 6 de tu amigo)
-    public function historial()
+    // Dentro de la clase SolicitudCorreccion
+    public function materiaRelacion()
     {
-        return $this->hasMany(HistorialNota::class, 'solicitud_id');
+        // Relacionamos materia_id de esta tabla con el id de la tabla materias
+        return $this->belongsTo(Materia::class, 'materia_id', 'id');
     }
 }

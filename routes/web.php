@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Http\Controllers\SolicitudController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -40,6 +41,8 @@ Route::get('/encriptar-mi-clave', function () {
     return "Usuario no encontrado.";
 });
 
-Route::get('/estudiante/dashboard', function () {
-    return view('dashboard_estudiante');
+Route::get('/estudiante/dashboard', [SolicitudController::class, 'index'])->middleware('auth');
+
+Route::get('/estudiante/nueva-solicitud', function () {
+    return view('nueva_solicitud');
 })->middleware('auth');
