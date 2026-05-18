@@ -46,5 +46,7 @@ Route::get('/estudiante/dashboard', [SolicitudController::class, 'index'])->midd
 Route::get('/estudiante/nueva-solicitud', [SolicitudController::class, 'crearSolicitud'])->middleware('auth');
 // Ruta para guardar la solicitud (esta es la que se llama al enviar el formulario)
 Route::post('/estudiante/guardar-solicitud', [SolicitudController::class, 'guardarSolicitud'])->middleware('auth');
-// 
+//  Ruta para ver el detalle de una solicitud específica
+Route::get('/estudiante/solicitud/{id}', [SolicitudController::class, 'verDetalle'])->middleware('auth');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

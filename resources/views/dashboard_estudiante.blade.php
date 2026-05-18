@@ -188,10 +188,10 @@
 
                             {{-- COLUMNA: Acciones --}}
                             <td class="p-4 text-right">
-                                <button
-                                    class="text-[#582D81] hover:underline font-bold text-xs uppercase tracking-widest hover:text-[#432262] transition">
+                                <a href="/estudiante/solicitud/{{ $solicitud->id }}"
+                                class="text-[#582D81] hover:underline font-bold text-xs uppercase tracking-widest hover:text-[#432262] transition">
                                     <i class="fas fa-eye mr-1"></i> Ver Detalles
-                                </button>
+                                    </a>
                             </td>
 
                         </tr>

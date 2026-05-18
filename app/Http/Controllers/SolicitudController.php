@@ -121,4 +121,68 @@ public function guardarSolicitud(Request $request)
     return redirect('/estudiante/dashboard')
         ->with('success', '¡Tu solicitud ha sido enviada al docente con éxito!');
 }
+public function verDetalle($id)
+{
+    // 1. Traer la solicitud — verificar que pertenece al estudiante logueado
+    $solicitud = DB::table('solicitudes_correccion')
+        ->join('materias', 'solicitudes_correccion.materia_id', '=', 'materias.id')
+        ->join('usuarios as docentes', 'solicitudes_correccion.docente_id', '=', 'docentes.id')
+        ->where('solicitudes_correccion.id', $id)
+        ->where('solicitudes_correccion.estudiante_id', Auth::id()) // Seguridad: solo SUS solicitudes
+        ->select(
+            'solicitudes_correccion.id',
+            'solicitudes_correccion.seccion',
+            'solicitudes_correccion.evaluacion',
+            'solicitudes_correccion.ciclo',
+            'solicitudes_correccion.nota_actual',
+            'solicitudes_correccion.motivo',
+            'solicitudes_correccion.estado',
+            'solicitudes_correccion.fecha_solicitud',
+            'materias.nombre as materia_nombre',
+            'docentes.nombre as docente_nombre'
+        )
+        ->first();
+
+    // Si no existe o no le pertenece, rebotar
+    if (!$solicitud) {
+        return redirect('/estudiante/dashboard')
+            ->with('error', 'Solicitud no encontrada o no tienes permiso para verla.');
+    }
+
+    // 2. Traer TODO el historial de aprobaciones de esta solicitud (ordenado por fecha)
+    $aprobaciones = DB::table('aprobaciones')
+        ->join('usuarios', 'aprobaciones.usuario_id', '=', 'usuarios.id')
+        ->where('aprobaciones.solicitud_id', $id)
+        ->select(
+            'aprobaciones.id',
+            'aprobaciones.accion',
+            'aprobaciones.comentario',
+            'aprobaciones.fecha',
+            'usuarios.nombre as actor_nombre',
+            'usuarios.rol as actor_rol'
+        )
+        ->orderBy('aprobaciones.fecha', 'asc')
+        ->get();
+
+    // 3. Para el timeline, necesitamos la ÚLTIMA acción de cada fase
+    //    Usamos LIKE porque el campo accion es texto libre ("Aprobado por docente", etc.)
+    $accionDocente      = $aprobaciones->filter(fn($a) => stripos($a->accion, 'docente') !== false)->last();
+    $accionCoordinador  = $aprobaciones->filter(fn($a) => stripos($a->accion, 'coordinador') !== false)->last();
+    $accionAdmin        = $aprobaciones->filter(fn($a) => stripos($a->accion, 'admin') !== false)->last();
+
+    // 4. Historial de nota (solo existirá si ya fue finalizado)
+    $historialNota = DB::table('historial_notas')
+        ->where('solicitud_id', $id)
+        ->orderBy('fecha', 'desc')
+        ->first();
+
+    return view('detalle_solicitud', compact(
+        'solicitud',
+        'aprobaciones',
+        'accionDocente',
+        'accionCoordinador',
+        'accionAdmin',
+        'historialNota'
+    ));
+}
 }
