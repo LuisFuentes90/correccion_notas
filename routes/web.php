@@ -42,7 +42,9 @@ Route::get('/encriptar-mi-clave', function () {
 });
 
 Route::get('/estudiante/dashboard', [SolicitudController::class, 'index'])->middleware('auth');
-
-Route::get('/estudiante/nueva-solicitud', function () {
-    return view('nueva_solicitud');
-})->middleware('auth');
+// Ruta para mostrar el formulario de nueva solicitud
+Route::get('/estudiante/nueva-solicitud', [SolicitudController::class, 'crearSolicitud'])->middleware('auth');
+// Ruta para guardar la solicitud (esta es la que se llama al enviar el formulario)
+Route::post('/estudiante/guardar-solicitud', [SolicitudController::class, 'guardarSolicitud'])->middleware('auth');
+// 
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

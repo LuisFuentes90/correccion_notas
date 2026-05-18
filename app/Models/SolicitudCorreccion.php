@@ -12,18 +12,18 @@ class SolicitudCorreccion extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'estudiante_id', // Nombre exacto de tu SQL
-        'materia_id',
-        'seccion',
-        'ciclo_id',
-        'ciclo',
-        'docente_id',
-        'evaluacion',
-        'nota_actual',
-        'motivo',
-        'estado',
-        'fecha_solicitud'
-    ];
+    'estudiante_id',
+    'materia_id',
+    'seccion',
+    'ciclo_id',
+    'ciclo',
+    'docente_id',
+    'evaluacion',
+    'nota_actual',
+    'motivo',
+    'estado',          // Los valores ahora son: pendiente_docente, rechazado_docente, etc.
+    'fecha_solicitud'
+];
 
     // Dentro de la clase SolicitudCorreccion
     public function materiaRelacion()

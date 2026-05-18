@@ -11,18 +11,18 @@ class AuthController extends Controller
     // Esta función servirá para procesar el formulario de login
     public function login(Request $request)
     {
-        // 1. Validamos los datos que vienen del formulario
+        // Validamos los datos que vienen del formulario
         $credentials = $request->validate([
             'correo' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // 2. Intentamos iniciar sesión
+        //  Intentamos iniciar sesión
         // Nota: Laravel por defecto busca 'email', así que le especificamos que use 'correo'
         if (Auth::attempt(['correo' => $credentials['correo'], 'password' => $credentials['password']])) {
             $request->session()->regenerate();
 
-            // 3. Obtenemos el usuario para ver su rol y mandarlo a su panel
+            //  Obtenemos el usuario para ver su rol y mandarlo a su panel
             $user = Auth::user();
 
             return match($user->rol) {
@@ -33,7 +33,7 @@ class AuthController extends Controller
             };
         }
 
-        // 4. Si falla, lo mandamos de regreso con error
+        // Si falla, lo mandamos de regreso con error
         return back()->withErrors([
             'correo' => 'Las credenciales no coinciden con nuestros registros.',
         ]);
@@ -45,6 +45,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+        return redirect('/login');
     }
 }
