@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Http\Controllers\SolicitudController;
+use App\Http\Controllers\DocenteController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -48,5 +49,11 @@ Route::get('/estudiante/nueva-solicitud', [SolicitudController::class, 'crearSol
 Route::post('/estudiante/guardar-solicitud', [SolicitudController::class, 'guardarSolicitud'])->middleware('auth');
 //  Ruta para ver el detalle de una solicitud específica
 Route::get('/estudiante/solicitud/{id}', [SolicitudController::class, 'verDetalle'])->middleware('auth');
+// Ruta para cancelar una solicitud (cambia su estado a cancelado)
+Route::get('/docente/dashboard', [DocenteController::class, 'index'])->middleware('auth');
+// Ruta para ver el detalle de una solicitud específica para el docente
+Route::get('/docente/solicitud/{id}', [DocenteController::class, 'verDetalle'])->middleware('auth');
+// Ruta para procesar la decisión del docente (aprobar/rechazar)
+Route::post('/docente/solicitud/{id}/decision', [DocenteController::class, 'procesarDecision'])->middleware('auth');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
