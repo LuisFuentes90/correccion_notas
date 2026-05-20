@@ -195,7 +195,16 @@
                     Cancelar
                 </a>
             </div>
-
+                
+            @if(session('error'))
+        <div id="alerta-error" 
+            class="container mx-auto max-w-4xl px-4 mt-4">
+                <div class="bg-red-50 border-l-4 border-red-600 text-red-700 p-4 rounded-r-lg shadow-md font-medium text-sm flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span>{{ session('error') }}</span>
+            </div>
+        </div>
+            @endif
         </form>
     </div>
 

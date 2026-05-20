@@ -72,7 +72,8 @@ class SolicitudController extends Controller
 }
 public function guardarSolicitud(Request $request)
 {
-    // . VALIDACIÓN
+    // 1. VALIDACIÓN
+    // Validamos los campos del formulario, asegurándonos de que el estudiante haya seleccionado una materia, sección, docente, etc.
     $request->validate([
         'materia_id'  => 'required|integer',
         'docente_id'  => 'required|integer',
@@ -82,17 +83,31 @@ public function guardarSolicitud(Request $request)
         'motivo'      => 'required|string|min:10',
     ]);
 
-    // . BUSCAR PERIODO — con guard para evitar crash si no existe
+    //  BUSCAR PERIODO — con guard para evitar crash si no existe
     $periodo = DB::table('periodos_correccion')
         ->where('id', $request->periodo_id)
         ->first();
-
+    // Si no encuentra el periodo, rebotar con mensaje
     if (!$periodo) {
         return redirect('/estudiante/nueva-solicitud')
             ->with('error', 'El periodo seleccionado no es válido.');
     }
 
-    // . BUSCAR CICLO — con guard
+    //  VERIFICAR DUPLICADO solo bloquea si hay una activa (no rechazada)
+    $yaExiste = DB::table('solicitudes_correccion')
+        ->where('estudiante_id', Auth::id())
+        ->where('materia_id', $request->materia_id)
+        ->where('evaluacion', $periodo->evaluacion)
+        ->where('ciclo_id', $periodo->ciclo_id)
+        ->whereNotIn('estado', ['rechazado_docente', 'rechazado_coordinador'])
+        ->exists();
+
+    if ($yaExiste) {
+    return redirect('/estudiante/nueva-solicitud')
+        ->with('error', 'Ya tienes una solicitud activa para esta materia y evaluación. Puedes enviar una nueva solo si la anterior fue rechazada.');
+}
+    //  BUSCAR CICLO — con guard
+    
     $cicloData = DB::table('ciclos_academicos')
         ->where('id', $periodo->ciclo_id)
         ->first();
@@ -102,7 +117,7 @@ public function guardarSolicitud(Request $request)
             ->with('error', 'No se encontró el ciclo académico asociado.');
     }
 
-    // . INSERT — tabla y estado corregidos
+    // INSERT — tabla y estado corregidos
     DB::table('solicitudes_correccion')->insert([
         'estudiante_id'   => Auth::id(),
         'materia_id'      => $request->materia_id,
@@ -113,11 +128,11 @@ public function guardarSolicitud(Request $request)
         'evaluacion'      => $periodo->evaluacion,
         'ciclo_id'        => $periodo->ciclo_id,
         'ciclo'           => $cicloData->nombre,
-        'estado'          => 'pendiente_docente', //  Valor real del ENUM
+        'estado'          => 'pendiente_docente',
         'fecha_solicitud' => now(),
     ]);
 
-    // . REDIRECCIÓN
+    // 6. REDIRECCIÓN
     return redirect('/estudiante/dashboard')
         ->with('success', '¡Tu solicitud ha sido enviada al docente con éxito!');
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DocenteController extends Controller
 {
@@ -156,12 +157,26 @@ class DocenteController extends Controller
             'evidencia.max'       => 'El archivo no puede superar los 5MB.',
         ]);
 
+        // LIMPIAR EVIDENCIA PREVIA si el docente está editando su decisión
+        $evidenciaPrevia = DB::table('evidencias')
+        ->where('solicitud_id', $id)
+        ->where('usuario_id', Auth::id())
+        ->first();
+
+        if ($evidenciaPrevia) {
+        // Borrar archivo físico del storage
+        Storage::disk('public')->delete($evidenciaPrevia->archivo);
+        // Borrar registro de la BD
+        DB::table('evidencias')->where('id', $evidenciaPrevia->id)->delete();
+}
         // Manejo del archivo de evidencia (opcional)
         $rutaArchivo = null;
+        // Si se subió un archivo, lo guardamos y registramos en la tabla evidencias
         if ($request->hasFile('evidencia') && $request->file('evidencia')->isValid()) {
             // Formato: evidencias/evidencia_docente_{solicitud_id}_{timestamp}.{ext}
             $extension   = $request->file('evidencia')->getClientOriginalExtension();
             $nombreArchivo = 'evidencia_docente_' . $id . '_' . time() . '.' . $extension;
+            // Guardar el archivo en el disco público (storage/app/public/evidencias)
             $rutaArchivo   = $request->file('evidencia')->storeAs('evidencias', $nombreArchivo, 'public');
 
             // Guardar en tabla evidencias
