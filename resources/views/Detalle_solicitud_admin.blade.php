@@ -107,13 +107,24 @@
                 — {{ $decisionDocente->actor_nombre }}
             </p>
             @if($decisionDocente->comentario)
-                {{-- Este comentario puede contener la nota correcta sugerida por el docente --}}
                 <div class="mt-2 bg-white border-l-4 border-blue-400 rounded p-3">
                     <p class="text-xs font-bold text-blue-500 uppercase mb-1">
-                        <i class="fas fa-lightbulb mr-1"></i> Comentario del docente (puede indicar la nota correcta)
+                        <i class="fas fa-lightbulb mr-1"></i> Comentario del docente
                     </p>
                     <p class="text-sm text-gray-700 italic leading-relaxed">
                         "{{ $decisionDocente->comentario }}"
+                    </p>
+                </div>
+            @endif
+
+            {{-- NOTA SUGERIDA PRIVADA — solo la ve el admin --}}
+            @if($decisionDocente->nota_sugerida_admin)
+                <div class="mt-3 bg-yellow-50 border-l-4 border-yellow-500 rounded p-3">
+                    <p class="text-xs font-bold text-yellow-600 uppercase mb-1">
+                        <i class="fas fa-lock mr-1"></i> Nota sugerida por el docente (solo visible para Admin)
+                    </p>
+                    <p class="text-sm text-gray-800 font-semibold leading-relaxed">
+                        {{ $decisionDocente->nota_sugerida_admin }}
                     </p>
                 </div>
             @endif
@@ -179,14 +190,14 @@
             @if($errors->any())
                 <div class="mx-6 mt-4 bg-red-50 border-l-4 border-red-500 p-3 rounded">
                     @foreach($errors->all() as $error)
-                        <p class="text-red-700 text-sm font-medium">⚠️ {{ $error }}</p>
+                        <p class="text-red-700 text-sm font-medium"><i class="fas fa-exclamation-triangle text-yellow-500"></i> {{ $error }}</p>
                     @endforeach
                 </div>
             @endif
 
             <form action="/admin/solicitud/{{ $solicitud->id }}/finalizar"
-                  method="POST"
-                  class="p-6 space-y-6">
+                method="POST"
+                class="p-6 space-y-6">
                 @csrf
 
                 {{-- Nota nueva --}}
@@ -207,7 +218,7 @@
                         placeholder="Ej: 8.50"
                         required>
                     <p id="error_nota" class="text-red-600 text-sm font-bold mt-2 hidden">
-                        ⚠️ La nota debe estar entre 0.0 y 10.0.
+                        <i class="fas fa-exclamation-triangle text-yellow-500"></i> La nota debe estar entre 0.0 y 10.0.
                     </p>
                 </div>
 
@@ -248,7 +259,6 @@
             var valor      = parseFloat(this.value);
             var btnFin     = document.getElementById('btn_finalizar');
             var errorMsg   = document.getElementById('error_nota');
-            var contenedor = document.getElementById('contenedor_nota');
 
             if (isNaN(valor) || valor < 0 || valor > 10) {
                 errorMsg.classList.remove('hidden');

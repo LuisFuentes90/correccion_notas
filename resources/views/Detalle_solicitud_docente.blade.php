@@ -240,6 +240,16 @@
                         class="w-full p-3 border-2 border-gray-200 rounded-lg outline-none focus:border-[#5D0A28] transition text-sm"
                         placeholder="Escribe tu comentario o justificación aquí...">{{ old('comentario') }}</textarea>
                 </div>
+                {{-- Campo privado para el admin: solo visible si aprueba --}}
+                <div id="campo_nota_admin" style="display:none;">
+                    <label class="block text-sm font-bold text-gray-700 uppercase mb-1">
+                        Nota sugerida para el Administrador
+                        <span class="text-red-500 ml-1">(Obligatorio al aprobar)</span>  {{-- cambias el span --}}
+                        </label>
+                        <textarea name="nota_sugerida_admin" rows="2"
+                            class="w-full p-3 border-2 border-gray-200 rounded-lg outline-none focus:border-[#5D0A28] transition text-sm"
+                            placeholder="Ej: La nota correcta es 8.5,">{{ old('nota_sugerida_admin') }}</textarea>
+                    </div>
 
                 {{-- Evidencia --}}
                 <div>
@@ -325,6 +335,20 @@
                 }
             });
         });
+            // Mostrar/ocultar campo nota_admin según decisión
+        document.querySelectorAll('input[name="decision"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                var campo = document.getElementById('campo_nota_admin');
+                campo.style.display = this.value === 'aprobado' ? 'block' : 'none';
+        });
+    });
+    // Si la página se recarga y "Aprobar" está seleccionado, mostrar el campo nota_admin
+    document.addEventListener('DOMContentLoaded', function() {
+        var radioAprobado = document.getElementById('radio_aprobar');
+        if (radioAprobado && radioAprobado.checked) {
+            document.getElementById('campo_nota_admin').style.display = 'block';
+        }
+    });
     </script>
 
 </body>

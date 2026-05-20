@@ -97,8 +97,8 @@ Route::get('/admin/dashboard', [AdminController::class, 'index'])
 Route::get('/admin/solicitud/{id}', [AdminController::class, 'verDetalle'])
     ->middleware(['auth', 'rol:admin']);
 
-// Ruta para procesar la decisión del admin (aprobar/rechazar)
-Route::post('/admin/solicitud/{id}/decision', [AdminController::class, 'procesarDecision'])
+// Ruta para finalizar la solicitud (solo si el admin la tiene en pendiente_admin)
+Route::post('/admin/solicitud/{id}/finalizar', [AdminController::class, 'finalizar'])
     ->middleware(['auth', 'rol:admin']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

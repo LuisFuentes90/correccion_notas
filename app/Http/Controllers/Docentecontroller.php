@@ -140,9 +140,15 @@ class DocenteController extends Controller
         // Validación base
         // decision: aprobado o rechazado
         $rules = [
-            'decision'   => 'required|in:aprobado,rechazado',
-            'comentario' => 'nullable|string|max:500',
-            'evidencia'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120', // 5MB máx
+            'decision'            => 'required|in:aprobado,rechazado',
+            'comentario'          => 'nullable|string|max:500',
+            'nota_sugerida_admin' => 'nullable|string|max:500',
+            //
+            'nota_sugerida_admin' => $request->decision === 'aprobado' // Si aprueba, el campo se vuelve obligatorio
+                                                                       //  para que el docente deje una nota sugerida al admin (aunque no es visible para el estudiante)
+                                    ? 'required|string|min:1|max:500' 
+                                    : 'nullable', // <-- agregar
+            'evidencia'           => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ];
 
         // Comentario obligatorio si rechaza
@@ -153,6 +159,8 @@ class DocenteController extends Controller
         $request->validate($rules, [
             'comentario.required' => 'Debes escribir una justificación para rechazar la solicitud.',
             'comentario.min'      => 'La justificación debe tener al menos 10 caracteres.',
+            'nota_sugerida_admin.required'   => 'Debes indicar la nota sugerida para el administrador.',
+            'nota_sugerida_admin.min'      => 'La nota sugerida debe tener al menos 1 caracter.',
             'evidencia.mimes'     => 'Solo se permiten archivos JPG, PNG o PDF.',
             'evidencia.max'       => 'El archivo no puede superar los 5MB.',
         ]);
@@ -200,11 +208,14 @@ class DocenteController extends Controller
 
         // Registrar en tabla aprobaciones
         DB::table('aprobaciones')->insert([
-            'solicitud_id' => $id,
-            'usuario_id'   => Auth::id(),
-            'accion'       => $accionTexto,
-            'comentario'   => $request->comentario ?? null,
-            'fecha'        => now(),
+            'solicitud_id'        => $id,
+            'usuario_id'          => Auth::id(),
+            'accion'              => $accionTexto,
+            'comentario'          => $request->comentario ?? null,
+            'nota_sugerida_admin' => $request->decision === 'aprobado'
+                                    ? ($request->nota_sugerida_admin ?? null)
+                                    : null,
+            'fecha'               => now(),
         ]);
 
         // Actualizar estado en solicitudes_correccion

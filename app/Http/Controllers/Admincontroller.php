@@ -89,6 +89,7 @@ class AdminController extends Controller
             ->select(
                 'aprobaciones.accion',
                 'aprobaciones.comentario',
+                'aprobaciones.nota_sugerida_admin',
                 'aprobaciones.fecha',
                 'usuarios.nombre as actor_nombre'
             )
